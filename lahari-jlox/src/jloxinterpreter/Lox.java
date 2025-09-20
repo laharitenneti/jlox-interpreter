@@ -10,13 +10,16 @@ import java.util.List;
 
 public class Lox {
     //to ensure that we're executing code w/o error
+    private static final Interpreter interpreter = new Interpreter();
     static boolean hadError = false;
+    static boolean hadRuntimeError = false;
     private static void runFile(String path) throws IOException {
         byte[] bytes = Files.readAllBytes(Paths.get(path));
         run(new String(bytes, Charset.defaultCharset()));
 
         //In exit code, we're indicating an error
         if (hadError) System.exit(65);
+        if (hadRuntimeError) System.exit(70);
     }
     private static void runPrompt() throws IOException {
         InputStreamReader input = new InputStreamReader(System.in);
@@ -46,14 +49,20 @@ public class Lox {
         Expr expression = parser.parse();
 
         if (hadError) return;
-
-        System.out.println(new AstPrinter().print(expression));
+        interpreter.interpret(expression);
+        //The line below was a temporary line, merely to print the parsed expression (tree)
+        //System.out.println(new AstPrinter().print(expression));
 
     }
 
     //error handling
     static void error(int line, String message) {
         report(line, "", message);
+    }
+
+    static void runtimeError(RuntimeError error) {
+        System.err.println(error.getMessage() + "\n[line " + error.token.line + "]");
+        hadRuntimeError = true;
     }
 
     private static void report(int line, String where, String message) {
