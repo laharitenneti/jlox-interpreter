@@ -18,6 +18,11 @@ class PrintExpr implements Expr.Visitor<String> {
     }
 
     @Override
+    public String visitCallExpr(Expr.Call expr) {
+        return null;
+    }
+
+    @Override
     public String visitGroupingExpr(Expr.Grouping expr) {
         //return paranthesize("group", expr.expression);
         return "(" + expr.expression.accept(this) + ")";
