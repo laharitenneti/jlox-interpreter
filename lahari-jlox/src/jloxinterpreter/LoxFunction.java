@@ -30,7 +30,7 @@ class LoxFunction implements LoxCallable {
         catch (Return returnValue) {
             return returnValue.value;
         }
-        interpreter.executeBlock(declaration.body, environment);
+        //interpreter.executeBlock(declaration.body, environment); -> This caused code to be printed twice!
         return null;
     }
 }
