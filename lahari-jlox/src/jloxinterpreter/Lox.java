@@ -48,9 +48,11 @@ public class Lox {
         Parser parser = new Parser(tokens);
         List<Stmt> statements = parser.parse();
         //Expr expression = parser.parse();
-
-        if (hadError) return;
+        if (hadError) return; //SYNTACTICAL ERROR ANALYSIS
+        Resolver resolver = new Resolver(interpreter);
+        resolver.resolve(statements);
         //interpreter.interpret(expression);
+        if (hadError) return; //SEMANTIC ERROR ANALYSIS
         interpreter.interpret(statements);
         //The line below was a temporary line, merely to print the parsed expression (tree)
         //System.out.println(new AstPrinter().print(expression));
