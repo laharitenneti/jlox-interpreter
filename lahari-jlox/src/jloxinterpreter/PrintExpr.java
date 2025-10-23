@@ -23,6 +23,11 @@ class PrintExpr implements Expr.Visitor<String> {
     }
 
     @Override
+    public String visitGetExpr(Expr.Get expr) {
+        return null;
+    }
+
+    @Override
     public String visitGroupingExpr(Expr.Grouping expr) {
         //return paranthesize("group", expr.expression);
         return "(" + expr.expression.accept(this) + ")";
@@ -65,5 +70,15 @@ class PrintExpr implements Expr.Visitor<String> {
     public String visitLogicalExpr(Logical expr) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'visitLogicalExpr'");
+    }
+
+    @Override
+    public String visitSetExpr(Expr.Set expr) {
+        return null;
+    }
+
+    @Override
+    public String visitThisExpr(Expr.This expr) {
+        return null;
     }
 }
