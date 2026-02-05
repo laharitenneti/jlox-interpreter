@@ -215,6 +215,10 @@ class Parser {
                 Expr.Get get = (Expr.Get)expr;
                 return new Expr.Set(get.object, get.name, value);
             }
+            else if (expr instanceof Expr.Subscript) {
+                Expr.Subscript subscript = (Expr.Subscript)expr;
+                return new Expr.SubscriptSet(subscript.name, subscript.bracket, subscript.index, value);
+            }
             error(equals, "Invalid assignment target.");
         }
         return expr;
@@ -320,6 +324,11 @@ class Parser {
             if (match(LEFT_PAREN)) {
                 expr = finishCall(expr);
             }
+            else if (match(LEFT_BRACKET)) {
+                Expr index = expression();
+                Token bracket = consume(RIGHT_BRACKET, "Expect ']' after index.");
+                expr = new Expr.Subscript(expr, bracket, index);
+            }
             else if (match(DOT)) {
                 Token name = consume(IDENTIFIER, "Expect property name after '.'");
                 expr = new Expr.Get(expr, name);
@@ -353,6 +362,16 @@ class Parser {
             Expr expr = expression();
             consume(RIGHT_PAREN, "Expect ')' after expression.");
             return new Expr.Grouping(expr);
+        }
+        if (match(LEFT_BRACKET)) {
+            List<Expr> elements = new ArrayList<>();
+            if (!check(RIGHT_BRACKET)) {
+                do {
+                    elements.add(expression());
+                } while (match(COMMA));
+            }
+            consume(RIGHT_BRACKET, "Expect ']' after array elements.");
+            return new Expr.Array(elements);
         }
         throw error(peek(), "Expect expression.");
     }

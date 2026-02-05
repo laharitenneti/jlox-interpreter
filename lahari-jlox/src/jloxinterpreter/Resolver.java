@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import jloxinterpreter.Expr.Array;
+import jloxinterpreter.Expr.Subscript;
+
 class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private final Interpreter interpreter;
     private final Stack<Map<String, Boolean>> scopes = new Stack();
@@ -290,5 +293,30 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
                 //basically stop looking if it's found in the local scope!
             }
         }
+    }
+
+    @Override
+    public Void visitArrayExpr(Array expr) {
+        // TODO Auto-generated method stub
+        for (Expr element : expr.elements) {
+            resolve(element);
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitSubscriptExpr(Subscript expr) {
+        // TODO Auto-generated method stub
+        resolve(expr.name);
+        resolve(expr.index);
+        return null;
+    }
+
+    @Override
+    public Void visitSubscriptSetExpr(Expr.SubscriptSet expr) {
+        resolve(expr.name);
+        resolve(expr.index);
+        resolve(expr.value);
+        return null;
     }
 }

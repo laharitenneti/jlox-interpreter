@@ -77,7 +77,27 @@ class AstPrinter implements Expr.Visitor<String> {
     }
 
     @Override
+    public String visitSuperExpr(Expr.Super expr) {
+        return null;
+    }
+
+    @Override
     public String visitThisExpr(Expr.This expr) {
         return null;
+    }
+
+    @Override
+    public String visitArrayExpr(Expr.Array expr) {
+        return paranthesize("list", expr.elements.toArray(new Expr[0]));
+        }
+
+    @Override
+    public String visitSubscriptExpr(Expr.Subscript expr) {
+        return paranthesize("subscript", expr.name, expr.index);
+    }
+
+    @Override
+    public String visitSubscriptSetExpr(Expr.SubscriptSet expr) {
+        return paranthesize("subscript-set", expr.name, expr.index, expr.value);
     }
 }

@@ -24,7 +24,10 @@ public class GenerateAst {
                 "Super: Token keyword, Token method",
                 "This: Token keyword",
                 "Unary: Token operator, Expr right",
-                "Variable: Token name"
+                "Variable: Token name",
+                "Array: List<Expr> elements",
+                "Subscript: Expr name, Token bracket, Expr index",
+                "SubscriptSet: Expr name, Token bracket, Expr index, Expr value"
         ));
         defineAst(outputDir, "Stmt", Arrays.asList(
                 "Block: List<Stmt> statements",

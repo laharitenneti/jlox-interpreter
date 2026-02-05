@@ -3,6 +3,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import jloxinterpreter.Expr.Array;
+import jloxinterpreter.Expr.Subscript;
 class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     final Environment globals = new Environment();
     private Environment environment = globals;
@@ -32,6 +35,33 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
 
             @Override
             public String toString() { return "<native fn>"; }
+        });
+
+        globals.define("len", new LoxCallable() {
+            @Override
+            public int arity() { return 1; }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                if (!(arguments.get(0) instanceof List)) {
+                    throw new RuntimeError(null, "Argument to 'len' must be a list.");
+                }
+                return (double)((List<?>)arguments.get(0)).size();
+            }
+        });
+
+        globals.define("push", new LoxCallable() {
+            @Override
+            public int arity() { return 2; }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                if (!(arguments.get(0) instanceof List)) {
+                    throw new RuntimeError(null, "First argument to 'push' must be a list.");
+                }
+                ((List<Object>)arguments.get(0)).add(arguments.get(1));
+                return null;
+            }
         });
     }
 
@@ -375,4 +405,57 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         throw new RuntimeError(expr.name, "Only instances have properties.");
     }
 
+    @Override
+    public Object visitArrayExpr(Expr.Array expr) {
+        // TODO Auto-generated method stub
+        List<Object> elements = new ArrayList<>();
+        for (Expr element : expr.elements) {
+            elements.add(evaluate(element));
+        }
+        return elements;
+    }
+
+    @Override
+    public Object visitSubscriptExpr(Expr.Subscript expr) {
+        // TODO Auto-generated method stub
+        Object name = evaluate(expr.name);
+        Object index = evaluate(expr.index);
+
+        if (!(name instanceof List)) {
+            throw new RuntimeError(expr.bracket, "Only lists can be indexed.");
+        }
+        if (!(index instanceof Double)) {
+            throw new RuntimeError(expr.bracket, "Index must be a number.");
+        }
+        List<Object> list = (List<Object>) name;
+        int i = ((Double)index).intValue();
+
+        if (i < 0 || i >= list.size()) {
+            throw new RuntimeError(expr.bracket, "Index out of bounds.");
+        }
+        return list.get(i);
+    }
+
+    @Override
+    public Object visitSubscriptSetExpr(Expr.SubscriptSet expr) {
+        Object name = evaluate(expr.name);
+        Object index = evaluate(expr.index);
+        Object value = evaluate(expr.value);
+
+        if (!(name instanceof List)) {
+            throw new RuntimeError(expr.bracket, "Only lists can be indexed.");
+        }
+        if (!(index instanceof Double)) {
+            throw new RuntimeError(expr.bracket, "Index must be a number.");
+        }
+        List<Object> list = (List<Object>)name;
+        int i = ((Double)index).intValue();
+
+        if (i < 0 || i >= list.size()) {
+            throw new RuntimeError(expr.bracket, "Index out of bounds.");
+        }
+
+        list.set(i, value);
+        return value;
+    }
 }

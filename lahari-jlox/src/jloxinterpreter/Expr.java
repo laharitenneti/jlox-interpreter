@@ -16,6 +16,9 @@ abstract class Expr {
   R visitThisExpr(This expr);
   R visitUnaryExpr(Unary expr);
   R visitVariableExpr(Variable expr);
+  R visitArrayExpr(Array expr);
+  R visitSubscriptExpr(Subscript expr);
+  R visitSubscriptSetExpr(SubscriptSet expr);
  }
  static class Assign extends Expr {
  Assign(Token name, Expr value) {
@@ -184,6 +187,52 @@ abstract class Expr {
    }
 
         final Token name;
+     }
+ static class Array extends Expr {
+ Array(List<Expr> elements) {
+        this.elements = elements;
+     }
+
+   @Override
+   <R> R accept(Visitor<R> visitor) {
+     return visitor.visitArrayExpr(this);
+   }
+
+        final List<Expr> elements;
+     }
+ static class Subscript extends Expr {
+ Subscript(Expr name, Token bracket, Expr index) {
+        this.name = name;
+        this.bracket = bracket;
+        this.index = index;
+     }
+
+   @Override
+   <R> R accept(Visitor<R> visitor) {
+     return visitor.visitSubscriptExpr(this);
+   }
+
+        final Expr name;
+        final Token bracket;
+        final Expr index;
+     }
+ static class SubscriptSet extends Expr {
+ SubscriptSet(Expr name, Token bracket, Expr index, Expr value) {
+        this.name = name;
+        this.bracket = bracket;
+        this.index = index;
+        this.value = value;
+     }
+
+   @Override
+   <R> R accept(Visitor<R> visitor) {
+     return visitor.visitSubscriptSetExpr(this);
+   }
+
+        final Expr name;
+        final Token bracket;
+        final Expr index;
+        final Expr value;
      }
 
   abstract <R> R accept(Visitor<R> visitor);
