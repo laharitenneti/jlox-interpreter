@@ -83,6 +83,52 @@ class Parser {
     private Stmt forStatement() {
         consume(LEFT_PAREN, "Expect '(' after 'for'.");
 
+        //Checking for for-in loop
+        if (match(VAR) && check(IDENTIFIER) && checkNext(IN)) {
+            Token name = consume(IDENTIFIER, "Expect variable name.");
+            consume(IN, "Expect 'in' after variable name.");
+            Expr collection = expression();
+            consume(RIGHT_PAREN, "Expect ')' after for clauses.");
+
+            Stmt body = statement();
+
+            int line = name.line;
+
+            Stmt itemVar = new Stmt.Var(name, new Expr.Subscript(
+                new Expr.Variable(new Token(IDENTIFIER, "_list", null, line)),
+                new Token(RIGHT_BRACKET, "]", null, line),
+                new Expr.Variable(new Token(IDENTIFIER, "_i", null, line))
+            ));
+
+            body = new Stmt.Block(Arrays.asList(itemVar, body));
+
+            Stmt increment = new Stmt.Expression(new Expr.Assign(
+                new Token(IDENTIFIER, "_i", null, line),
+                new Expr.Binary(
+                    new Expr.Variable(new Token(IDENTIFIER, "_i", null, line)),
+                    new Token(PLUS, "+", null, line),
+                    new Expr.Literal(1.0)
+                )
+            ));
+
+            Expr condition = new Expr.Binary(
+                new Expr.Variable(new Token(IDENTIFIER, "_i", null, line)),
+                new Token(LESS, "<", null, line),
+                new Expr.Call(
+                    new Expr.Variable(new Token(IDENTIFIER, "len", null, line)),
+                    new Token(RIGHT_PAREN, ")", null, line),
+                    Arrays.asList(new Expr.Variable(new Token(IDENTIFIER, "_list", null, line)))
+                )
+            );
+
+            body = new Stmt.While(condition, new Stmt.Block(Arrays.asList(body, increment)));
+            Stmt listVar = new Stmt.Var(new Token(IDENTIFIER, "_list", null, line), collection);
+            Stmt indexVar = new Stmt.Var(new Token(IDENTIFIER, "_i", null, line), new Expr.Literal(0.0));
+
+            return new Stmt.Block(Arrays.asList(listVar, indexVar, body));
+        }
+
+        //Normal for-loop
         Stmt initializer;
         if (match(SEMICOLON)) {
             initializer = null;
@@ -126,6 +172,12 @@ class Parser {
             elseBranch = statement();
         }
         return new Stmt.If(condition, thenBranch, elseBranch);
+    }
+
+    private boolean checkNext(TokenType type) {
+        if (isAtEnd()) return false;
+        if (tokens.get(current + 1).type == EOF) return false;
+        return tokens.get(current + 1).type == type;
     }
 
     private Stmt printStatement() {
