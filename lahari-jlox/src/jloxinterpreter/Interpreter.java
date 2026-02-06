@@ -63,6 +63,25 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
                 return null;
             }
         });
+
+        globals.define("pop", new LoxCallable() {
+            @Override
+            public int arity() { return 1; }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                if (!(arguments.get(0) instanceof List)) {
+                    throw new RuntimeError(null, "Argument to ‘pop’ must be a list.");
+                }
+
+                List<Object> list = (List<Object>)arguments.get(0);
+
+                if (list.isEmpty()) {
+                    throw new RuntimeError(null, "Can't pop from an empty list.");
+                }
+                return list.remove(list.size() - 1);
+            }
+        });
     }
 
     //Changed to accomodate statements
